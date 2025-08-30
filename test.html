@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Table Order - Basic FE</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 24px; max-width: 1100px; }
+    h1 { margin: 8px 0 16px; }
+    h2 { margin: 24px 0 12px; }
+    .row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); background: #fff; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    label { font-weight: 600; }
+    input, select, button { padding: 8px 10px; border-radius: 8px; border: 1px solid #d1d5db; }
+    button { cursor: pointer; }
+    button.primary { background: #111827; color: #fff; border: none; }
+    button.ghost { background: #f3f4f6; }
+    .muted { color: #6b7280; font-size: 12px; }
+    .pill { padding: 2px 8px; border-radius: 999px; font-size: 12px; display: inline-block; background: #eef2ff; }
+    .success { color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; }
+    .error { color: #7f1d1d; background: #fef2f2; border: 1px solid #fecaca; }
+    .msg { padding: 8px 12px; border-radius: 8px; margin-top: 10px; }
+    .right { float: right; }
+    .hr { height: 1px; background: #e5e7eb; margin: 12px 0; }
+    .w-64 { width: 16rem; }
+    .nowrap { white-space: nowrap; }
+    .small { font-size: 12px; color: #6b7280; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+    .table th { background: #fafafa; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0b0c; color: #f3f4f6; }
+      .card { background: #111214; border-color: #1f2937; }
+      input, select, button { background: #0f1115; color: #f3f4f6; border-color: #374151; }
+      .ghost { background: #1f2937 !important; }
+      .hr { background: #1f2937; }
+      .table th, .table td { border-bottom-color: #1f2937; }
+      .table th { background: #0f1115; }
+    }
+  </style>
+</head>
+<body>
+  <h1>🍜 Table Order — Basic Frontend</h1>
+
+  <div class="card">
+    <div class="row">
+      <label for="baseUrl">API Base</label>
+      <input id="baseUrl" class="w-64" value="http://localhost:3000/api" />
+      <button id="applyBase" class="ghost">Apply</button>
+      <span id="baseApplied" class="muted"></span>
+      <button id="refreshAll" class="right">Refresh All</button>
+    </div>
+  </div>
+
+  <h2>Menu</h2>
+  <div id="foods" class="grid"></div>
+
+  <div class="hr"></div>
+
+  <h2>Create Order</h2>
+  <div class="card">
+    <div class="row">
+      <label>Table #</label>
+      <input id="tableNumber" type="number" min="1" placeholder="1" class="w-64" />
+    </div>
+
+    <div class="row">
+      <label>Add item</label>
+      <select id="foodSelect" class="w-64"></select>
+      <input id="foodQty" type="number" min="1" value="1" className="w-64" />
+      <input id="foodNote" type="text" placeholder="note (optional)" class="w-64" />
+      <button id="addToCart" class="ghost">Add to cart</button>
+    </div>
+
+    <div id="cartList"></div>
+    <div class="row" style="margin-top:8px">
+      <button id="createOrder" class="primary">Create Order</button>
+      <button id="clearCart" class="ghost">Clear</button>
+      <span id="orderMsg" class="msg" style="display:none"></span>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+
+  <h2>Orders</h2>
+  <div class="row">
+    <button id="refreshOrders" class="ghost">Refresh Orders</button>
+  </div>
+  <div id="orders"></div>
+
+  <script type="module" src="./test.js"></script>
+</body>
+</html>

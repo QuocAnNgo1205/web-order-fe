@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Table Order — User</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 0; background: #f8fafc; color: #0f172a; }
+    a { color: inherit; text-decoration: none; }
+    /* Navbar */
+    .nav {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: #111827; color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+    }
+    .nav .left { display: flex; align-items: center; gap: 12px; }
+    .nav .brand { font-weight: 700; }
+    .nav .table-badge { background: #1f2937; padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+    .nav .right { display: flex; align-items: center; gap: 12px; }
+    .cart-btn { position: relative; background: #f59e0b; color: #111827; border: none; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+    .cart-count {
+      position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff;
+      border-radius: 999px; font-size: 11px; padding: 2px 6px; min-width: 18px; text-align: center;
+    }
+    .api-hint { font-size: 12px; opacity: .8; }
+
+    /* Container */
+    .container { padding: 16px; max-width: 1200px; margin: 0 auto; }
+
+    /* Cards grid */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,.04); display: flex; flex-direction: column;
+    }
+    .thumb-wrap { position: relative; cursor: zoom-in; }
+    .thumb { width: 100%; height: 160px; object-fit: cover; display: block; background: #f1f5f9; }
+    .content { padding: 12px; display: grid; gap: 8px; }
+    .title { font-weight: 700; }
+    .price { color: #334155; font-weight: 600; }
+    .qty-row { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+    .btn-qty { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-size: 18px; }
+    .num { min-width: 28px; text-align: center; font-weight: 700; }
+
+    /* Drawer (cart) */
+    .backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, .35); opacity: 0; pointer-events: none; transition: .2s; }
+    .drawer { position: fixed; top: 0; right: -420px; height: 100vh; width: 400px; background: #fff; box-shadow: -4px 0 16px rgba(0,0,0,.2); transition: .25s; display: flex; flex-direction: column; }
+    .drawer.open { right: 0; }
+    .backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer .head { padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+    .drawer .body { padding: 12px 16px; flex: 1; overflow: auto; }
+    .drawer .foot { padding: 12px 16px; border-top: 1px solid #e5e7eb; display: grid; gap: 10px; }
+    .line { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+    .muted { color: #64748b; font-size: 13px; }
+    .btn { padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+    .btn.primary { background: #111827; color: #fff; border-color: #111827; }
+    .total { display: flex; justify-content: space-between; font-weight: 800; }
+
+    /* Detail modal */
+    .modal { position: fixed; inset: 0; display: none; place-items: center; }
+    .modal.show { display: grid; }
+    .modal .overlay { position: absolute; inset: 0; background: rgba(15, 23, 42, .5); }
+    .modal .box {
+      position: relative; z-index: 10; width: min(920px, 92vw); background: #fff; border-radius: 16px;
+      overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.35);
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .modal .img { width: 100%; height: 320px; object-fit: cover; background: #f1f5f9; }
+    .modal .info { padding: 16px; display: grid; gap: 8px; }
+    .modal .close { position: absolute; top: 10px; right: 10px; background: #111827; color: #fff; border: none; border-radius: 10px; padding: 6px 10px; cursor: pointer; }
+
+    @media (max-width: 720px) {
+      .modal .box { grid-template-columns: 1fr; }
+      .drawer { width: 100vw; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b0b0c; color: #e5e7eb; }
+      .card, .drawer { background: #111214; border-color: #1f2937; }
+      .thumb, .modal .img { background: #0f1115; }
+      .line { border-bottom-color: #1f2937; }
+      .btn { background: #0f1115; color: #e5e7eb; border-color: #374151; }
+      .btn.primary { background: #f59e0b; color: #111827; border-color: #f59e0b; }
+      .modal .box { background: #111214; }
+      .modal .close { background: #f59e0b; color: #111827; }
+    }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <div class="nav">
+    <div class="left">
+      <div class="brand">🍜 Table Order</div>
+      <div id="tableBadge" class="table-badge">Table ?</div>
+    </div>
+    <div class="right">
+      <div class="api-hint" id="apiHint">API: http://localhost:3000/api</div>
+      <button id="cartBtn" class="cart-btn">
+        Cart
+        <span id="cartCount" class="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="container">
+    <div id="menuGrid" class="grid"></div>
+  </div>
+
+  <!-- CART DRAWER -->
+  <div id="backdrop" class="backdrop"></div>
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="head">
+      <strong>Cart</strong>
+      <button id="closeDrawer" class="btn">Back</button>
+    </div>
+    <div id="cartBody" class="body"></div>
+    <div class="foot">
+      <div class="total"><span>Subtotal</span><span id="subtotal">0 ₫</span></div>
+      <button id="submitOrder" class="btn primary">Submit Order</button>
+      <div class="muted">After submit, cart will reset for a new order.</div>
+    </div>
+  </aside>
+
+  <!-- DETAIL MODAL -->
+  <div id="detailModal" class="modal" aria-hidden="true">
+    <div class="overlay" id="detailOverlay"></div>
+    <div class="box">
+      <img id="detailImg" class="img" alt="preview" />
+      <div class="info">
+        <h3 id="detailTitle"></h3>
+        <div id="detailPrice" class="price"></div>
+        <p id="detailDesc" class="muted"></p>
+      </div>
+      <button id="detailClose" class="close">Close</button>
+    </div>
+  </div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
